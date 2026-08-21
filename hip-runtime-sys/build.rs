@@ -7,11 +7,18 @@ fn main() {
     let hip_path = root_candidates()
         .find(|path| path.join("include/hip/hip_runtime_api.h").is_file())
         .unwrap_or_else(|| {
-            panic!(
+            let error = format!(
                 "Unable to find include path containing `hip/hip_runtime_api.h` under any of: {:?}.
                 Set the `HIP_PATH` environment variable such that `$HIP_PATH/include/hip/hip_runtime_api.h` exists.",
                 root_candidates().collect::<Vec<_>>()
-            )
+            );
+            if std::env::var("DOCS_RS").is_ok() {
+                // Running from docs.rs, just output a warning to let the docs build succeed
+                println!("cargo:warning={}: {}", env!("CARGO_PKG_NAME"), error);
+                "/opt/rocm".into()
+            } else {
+                panic!("{}", error)
+            }
         });
 
     println!(
