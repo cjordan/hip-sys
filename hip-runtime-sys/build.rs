@@ -71,6 +71,25 @@ fn main() {
  */
 #[allow(unused)]
 fn root_candidates() -> impl Iterator<Item = PathBuf> {
+    // Run `hipconfig -p` to find an installed path
+    let mut hipconfig_paths = None.into_iter();
+    let mut hipconfig = std::process::Command::new("hipconfig");
+    hipconfig.arg("-p");
+
+    let hipconfig_r = hipconfig.output();
+    if let Ok(r) = &hipconfig_r {
+        if !r.status.success() {
+            println!(
+                "cargo:warning={}: `hipconfig -p` exited unsuccessfully",
+                env!("CARGO_PKG_NAME")
+            );
+        } else {
+            let s =
+                String::from_utf8(r.stdout.clone()).expect("`hipconfig -p` returned invalid utf-8");
+            hipconfig_paths = Some(PathBuf::from(s)).into_iter();
+        }
+    }
+
     let env_vars = [
         "HIP_PATH",
         "ROCM_PATH", // on rocm>6, HIP_PATH is ROCM_PATH
@@ -84,5 +103,5 @@ fn root_candidates() -> impl Iterator<Item = PathBuf> {
         "/opt/rocm/hip",
     ].iter()
         .map(Into::<PathBuf>::into);
-    env_vars.chain(roots)
+    hipconfig_paths.chain(env_vars).chain(roots)
 }

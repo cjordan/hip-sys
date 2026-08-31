@@ -5,7 +5,7 @@ Rust bindings for HIP
   - A ROCm platform ie a compatible AMD GPU
     * `hipblas` can be accessed with the `blas` feature
     * Specify the path to `hip` with `HIP_PATH`. If not provided,
-      `/opt/rocm/hip` is assumed
+      `hipconfig -p` is tried or `/opt/rocm/hip` is assumed
     * Specify the path to `hipblas` with `HIP_BLAS_PATH`. If not provided,
       `/opt/rocm/hipblas` is assumed
     * Native bindings can be generated with the `bindgen` feature
